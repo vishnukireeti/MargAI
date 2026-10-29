@@ -235,6 +235,24 @@
            so it's clear these open something, without applying motion to every static card. */
         .card-interactive { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
         .card-interactive:hover, .card-interactive:focus-within { transform: translateY(-3px); box-shadow: 0 16px 28px -12px rgba(var(--brand-600-rgb), .22); border-color: #bfdbfe; }
+        .card-interactive:active { transform: translateY(-1px) scale(.985); }
+
+        /* Tap/press feedback: every plain button gets a brief, subtle press-down so touch feels
+           responsive even where there's no hover state to rely on (phones). Cards that use the
+           button tag keep their own lift/press above instead (:not(.card-interactive) below), so
+           the two rules never fight over the same transform. button{} alone is deliberately a low-
+           specificity fallback transition: it only kicks in for buttons that don't already carry
+           Tailwind's own .transition utility (which already animates transform). */
+        button { transition: transform .1s ease; }
+        button:active:not(:disabled):not(.card-interactive) { transform: scale(.96); }
+        @media (prefers-reduced-motion: reduce) {
+            button:active, .card-interactive:active { transform: none; }
+        }
+
+        /* A brief celebratory pop for one-off "you did it" moments (quiz finished, first item saved). */
+        @keyframes popIn { 0% { opacity: 0; transform: scale(.85); } 60% { opacity: 1; transform: scale(1.04); } 100% { transform: scale(1); } }
+        .celebrate-pop { animation: popIn .5s cubic-bezier(.16,.84,.44,1) both; }
+        @media (prefers-reduced-motion: reduce) { .celebrate-pop { animation: none; } }
 
         /* One deliberate warm glow behind the hero — not repeated elsewhere in the app. */
         #view-home { position: relative; }
@@ -553,8 +571,8 @@
 
                 <!-- Wizard Results -->
                 <div id="wizard-results" class="hidden">
-                    <div class="bg-brand-50 border border-brand-100 rounded-2xl p-6 mb-6">
-                        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Discovery Complete</span>
+                    <div class="celebrate-pop bg-brand-50 border border-brand-100 rounded-2xl p-6 mb-6">
+                        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">🎉 Discovery Complete</span>
                         <h3 class="text-xl font-bold text-slate-900 mt-3 mb-2">Your Exploration Map</h3>
                         <p class="text-slate-600 text-sm" id="wizard-results-summary">Based on your inputs, here are your matching tracks:</p>
                         <p class="text-xs text-brand-800 bg-white/60 border border-brand-100 rounded-lg px-3 py-2 mt-3">This is guidance based on your answers, not a substitute for advice from a counsellor, teacher, or doctor. Please discuss big decisions with someone you trust.</p>
@@ -707,8 +725,10 @@
             </div>
             <div id="explorer-more" class="hidden text-center"></div>
             <div id="explorer-empty-state" class="hidden text-center py-16">
-                <p class="text-slate-500 font-medium">No careers match your filters.</p>
-                <button onclick="resetExplorerFilters()" class="mt-3 text-brand-600 text-sm font-semibold hover:underline">Clear all filters</button>
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl" aria-hidden="true">🔍</div>
+                <p class="text-slate-700 font-semibold">No careers match your filters</p>
+                <p class="text-slate-500 text-sm mt-1">Try removing a filter or searching a different word.</p>
+                <button type="button" onclick="resetExplorerFilters()" class="mt-4 min-h-[40px] px-4 border border-brand-200 text-brand-700 hover:bg-brand-50 rounded-xl text-sm font-semibold transition">Clear all filters</button>
             </div>
         </section>
 
@@ -881,8 +901,10 @@
             </div>
             <div id="exams-more" class="hidden text-center"></div>
             <div id="exams-empty-state" class="hidden text-center py-16">
-                <p class="text-slate-500 font-medium">No exams match your filters.</p>
-                <button onclick="resetExamFilters()" class="mt-3 text-brand-600 text-sm font-semibold hover:underline">Clear all filters</button>
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl" aria-hidden="true">🎯</div>
+                <p class="text-slate-700 font-semibold">No exams match your filters</p>
+                <p class="text-slate-500 text-sm mt-1">Try removing a filter or searching a different word.</p>
+                <button type="button" onclick="resetExamFilters()" class="mt-4 min-h-[40px] px-4 border border-brand-200 text-brand-700 hover:bg-brand-50 rounded-xl text-sm font-semibold transition">Clear all filters</button>
             </div>
 
             <!-- Myths & worries -->
@@ -1186,8 +1208,10 @@
             </div>
             <div data-cmode="degree" id="colleges-more" class="hidden text-center"></div>
             <div data-cmode="degree" id="colleges-empty-state" class="hidden text-center py-16">
-                <p class="text-slate-500 font-medium">No colleges match your filters.</p>
-                <button onclick="resetCollegeFilters()" class="mt-3 text-brand-600 text-sm font-semibold hover:underline">Clear all filters</button>
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl" aria-hidden="true">🏫</div>
+                <p class="text-slate-700 font-semibold">No colleges match your filters</p>
+                <p class="text-slate-500 text-sm mt-1">Try removing a filter or searching a different word.</p>
+                <button type="button" onclick="resetCollegeFilters()" class="mt-4 min-h-[40px] px-4 border border-brand-200 text-brand-700 hover:bg-brand-50 rounded-xl text-sm font-semibold transition">Clear all filters</button>
             </div>
 
             <!-- Myths & Realities -->
@@ -7925,7 +7949,7 @@
         document.addEventListener('click', revealIntent, true);
         document.addEventListener('change', revealIntent, true);
 
-        const GLOSSARY = [{"key": "domicile", "label": "Domicile", "def": "The state you officially belong to, usually where you have lived or studied for some years. Many state colleges keep seats for students with that state’s domicile.", "re": "\\bdomicile\\b", "flags": "i"}, {"key": "EWS", "label": "EWS", "def": "Economically Weaker Section: a 10% reservation for general-category families below an income limit (₹8 lakh a year for central institutions).", "re": "\\bEWS\\b", "flags": ""}, {"key": "PwD", "label": "PwD", "def": "Persons with Disabilities: a reserved category for students with a benchmark disability, with its own seats and relaxations.", "re": "\\bPwD\\b", "flags": ""}, {"key": "OBC-NCL", "label": "OBC-NCL", "def": "Other Backward Classes, Non-Creamy Layer: OBC families below the income limit, who can use the OBC quota.", "re": "\\bOBC-NCL\\b", "flags": ""}, {"key": "counselling", "label": "Counselling", "def": "The seat-allotment process after an entrance exam: you fill your college and course choices, and seats are given out by rank.", "re": "\\bcounsell?ing\\b", "flags": "i"}, {"key": "AICTE", "label": "AICTE", "def": "All India Council for Technical Education: it approves engineering, management, pharmacy and diploma colleges.", "re": "\\bAICTE\\b", "flags": ""}, {"key": "NIRF", "label": "NIRF", "def": "National Institutional Ranking Framework: the government’s yearly ranking of colleges, done separately for each field.", "re": "\\bNIRF\\b", "flags": ""}, {"key": "CUET", "label": "CUET", "def": "Common University Entrance Test: used for undergraduate admission to central universities and many others.", "re": "\\bCUET\\b", "flags": ""}, {"key": "CGPA", "label": "CGPA", "def": "Cumulative Grade Point Average: your average grade across semesters, usually out of 10.", "re": "\\bCGPA\\b", "flags": ""}, {"key": "percentile", "label": "Percentile", "def": "The share of candidates who scored the same as or less than you. A 90 percentile means you did at least as well as 90% of candidates.", "re": "\\bpercentiles?\\b", "flags": "i"}, {"key": "backlog", "label": "Backlog", "def": "A college subject you failed and still have to clear.", "re": "\\bbacklogs?\\b", "flags": "i"}, {"key": "cutoff", "label": "Cutoff", "def": "The last rank or score that got a seat in a previous year. It changes every year.", "re": "\\bcut-?offs?\\b", "flags": "i"}, {"key": "lateral entry", "label": "Lateral entry", "def": "Joining a course directly in its second year, for example a diploma holder joining B.Tech.", "re": "\\blateral entry\\b", "flags": "i"}, {"key": "stipend", "label": "Stipend", "def": "A fixed monthly payment while you train, for example during an apprenticeship.", "re": "\\bstipends?\\b", "flags": "i"}, {"key": "NCVT", "label": "NCVT", "def": "National Council for Vocational Training: its certificates are the recognised ones for ITI trades.", "re": "\\bNCVT\\b", "flags": ""}, {"key": "seat matrix", "label": "Seat matrix", "def": "The official list of seats in each college, course and category for an admission round.", "re": "\\bseat matrix\\b", "flags": "i"}, {"key": "JoSAA", "label": "JoSAA", "def": "Joint Seat Allocation Authority: it runs counselling for IITs, NITs, IIITs and some other institutes using JEE ranks.", "re": "\\bJoSAA\\b", "flags": ""}, {"key": "MCC", "label": "MCC", "def": "Medical Counselling Committee: it runs counselling for all-India quota medical seats using NEET ranks.", "re": "\\bMCC\\b", "flags": ""}, {"key": "CBT", "label": "CBT", "def": "Computer-Based Test: the exam is taken on a computer at a test centre.", "re": "\\bCBT\\b", "flags": ""}, {"key": "FYJC", "label": "FYJC", "def": "First Year Junior College: Class 11 in Maharashtra.", "re": "\\bFYJC\\b", "flags": ""}, {"key": "PU college", "label": "PU college", "def": "Pre-University college: where Class 11 and 12 are taught in Karnataka.", "re": "\\bPU colleges?\\b", "flags": ""}, {"key": "articleship", "label": "Articleship", "def": "Practical training under a practising Chartered Accountant, which is part of the CA course.", "re": "\\barticleship\\b", "flags": "i"}, {"key": "NTA", "label": "NTA", "def": "National Testing Agency: it runs JEE Main, NEET UG, CUET and other national exams.", "re": "\\bNTA\\b", "flags": ""}];
+        const GLOSSARY = [{"key": "domicile", "label": "Domicile", "def": "The state you officially belong to, usually where you have lived or studied for some years. Many state colleges keep seats for students with that state’s domicile.", "re": "\\bdomicile\\b", "flags": "i"}, {"key": "EWS", "label": "EWS", "def": "Economically Weaker Section: a 10% reservation for general-category families below an income limit (₹8 lakh a year for central institutions).", "re": "\\bEWS\\b", "flags": ""}, {"key": "PwD", "label": "PwD", "def": "Persons with Disabilities: a reserved category for students with a benchmark disability, with its own seats and relaxations.", "re": "\\bPwD\\b", "flags": ""}, {"key": "OBC-NCL", "label": "OBC-NCL", "def": "Other Backward Classes, Non-Creamy Layer: OBC families below the income limit, who can use the OBC quota.", "re": "\\bOBC-NCL\\b", "flags": ""}, {"key": "counselling", "label": "Counselling", "def": "The seat-allotment process after an entrance exam: you fill your college and course choices, and seats are given out by rank.", "re": "\\bcounsell?ing\\b", "flags": "i"}, {"key": "AICTE", "label": "AICTE", "def": "All India Council for Technical Education: it approves engineering, management, pharmacy and diploma colleges.", "re": "\\bAICTE\\b", "flags": ""}, {"key": "NIRF", "label": "NIRF", "def": "National Institutional Ranking Framework: the government’s yearly ranking of colleges, done separately for each field.", "re": "\\bNIRF\\b", "flags": ""}, {"key": "CUET", "label": "CUET", "def": "Common University Entrance Test: used for undergraduate admission to central universities and many others.", "re": "\\bCUET\\b", "flags": ""}, {"key": "CGPA", "label": "CGPA", "def": "Cumulative Grade Point Average: your average grade across semesters, usually out of 10.", "re": "\\bCGPA\\b", "flags": ""}, {"key": "percentile", "label": "Percentile", "def": "The share of candidates who scored the same as or less than you. A 90 percentile means you did at least as well as 90% of candidates.", "re": "\\bpercentiles?\\b", "flags": "i"}, {"key": "backlog", "label": "Backlog", "def": "A college subject you failed and still have to clear.", "re": "\\bbacklogs?\\b", "flags": "i"}, {"key": "cutoff", "label": "Cutoff", "def": "The last rank or score that got a seat in a previous year. It changes every year.", "re": "\\bcut-?offs?\\b", "flags": "i"}, {"key": "lateral entry", "label": "Lateral entry", "def": "Joining a course directly in its second year, for example a diploma holder joining B.Tech.", "re": "\\blateral entry\\b", "flags": "i"}, {"key": "stipend", "label": "Stipend", "def": "A fixed monthly payment while you train, for example during an apprenticeship.", "re": "\\bstipends?\\b", "flags": "i"}, {"key": "NCVT", "label": "NCVT", "def": "National Council for Vocational Training: its certificates are the recognised ones for ITI trades.", "re": "\\bNCVT\\b", "flags": ""}, {"key": "seat matrix", "label": "Seat matrix", "def": "The official list of seats in each college, course and category for an admission round.", "re": "\\bseat matrix\\b", "flags": "i"}, {"key": "JoSAA", "label": "JoSAA", "def": "Joint Seat Allocation Authority: it runs counselling for IITs, NITs, IIITs and some other institutes using JEE ranks.", "re": "\\bJoSAA\\b", "flags": ""}, {"key": "MCC", "label": "MCC", "def": "Medical Counselling Committee: it runs counselling for all-India quota medical seats using NEET ranks.", "re": "\\bMCC\\b", "flags": ""}, {"key": "CBT", "label": "CBT", "def": "Computer-Based Test: the exam is taken on a computer at a test centre.", "re": "\\bCBT\\b", "flags": ""}, {"key": "FYJC", "label": "FYJC", "def": "First Year Junior College: Class 11 in Maharashtra.", "re": "\\bFYJC\\b", "flags": ""}, {"key": "PU college", "label": "PU college", "def": "Pre-University college: where Class 11 and 12 are taught in Karnataka.", "re": "\\bPU colleges?\\b", "flags": ""}, {"key": "articleship", "label": "Articleship", "def": "Practical training under a practising Chartered Accountant, which is part of the CA course.", "re": "\\barticleship\\b", "flags": "i"}, {"key": "NTA", "label": "NTA", "def": "National Testing Agency: it runs JEE Main, NEET UG, CUET and other national exams.", "re": "\\bNTA\\b", "flags": ""}, {"key": "AIQ", "label": "AIQ", "def": "All India Quota: seats at central institutes (IITs, NITs, AIIMS and others) filled from one national merit list, not state by state.", "re": "\\bAIQ\\b", "flags": ""}, {"key": "horizontal reservation", "label": "Horizontal reservation", "def": "A reservation that applies within every category, not as its own separate block — for example a PwD or sports-quota seat is still counted inside General, OBC, SC, ST or EWS as well.", "re": "\\bhorizontal reservations?\\b", "flags": "i"}, {"key": "home state quota", "label": "Home-state quota", "def": "Seats in a state's own colleges set aside for students who are residents (domiciled) of that state. Students from other states compete for the smaller number of remaining seats.", "re": "\\bhome-?state quotas?\\b", "flags": "i"}, {"key": "creamy layer", "label": "Creamy layer", "def": "An income/status ceiling for OBC reservation. Families above it don't get OBC quota benefits even though they belong to an OBC caste — this is what \"non-creamy layer\" (NCL) certificates prove you're below.", "re": "\\bcreamy layer\\b", "flags": "i"}, {"key": "probationary officer", "label": "Probationary Officer", "def": "An entry-level bank management role. \"Probationary\" refers to a 1–2 year training period you go through before being confirmed as a full officer.", "re": "\\bProbationary Officer\\b", "flags": "i"}];
         GLOSSARY.forEach(function (g) { g.rx = new RegExp(g.re, g.flags); });
         // A figure is either checked against an official source (green tag, with the source and year) or an estimate (amber tag).
         function verifiedTag(label, src) {
@@ -8396,11 +8420,13 @@
            ============================================================ */
         function showToast(msg) {
             const container = document.getElementById('toast-container');
-            if ([...container.children].some(c => c.textContent === msg)) return;
+            if ([...container.children].some(c => c.dataset.msg === msg)) return;
             while (container.children.length >= 2) container.firstChild.remove();
             const el = document.createElement('div');
-            el.className = 'toast-enter bg-slate-900 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg';
-            el.textContent = msg;
+            el.className = 'toast-enter bg-slate-900 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg flex items-center gap-2';
+            el.dataset.msg = msg;
+            const icon = /^(Saved|Added|Marked)/.test(msg) ? '✅' : /^Removed/.test(msg) ? '🗑️' : '';
+            el.innerHTML = (icon ? '<span aria-hidden="true" class="text-base leading-none">' + icon + '</span>' : '') + '<span>' + escapeAuth(msg) + '</span>';
             container.appendChild(el);
             setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, 2400);
         }
@@ -11232,10 +11258,11 @@
                     const e = examsData.find(x => x.id === id);
                     if (!e) return '';
                     const d = daysUntil(e.examDate);
+                    const badgeTone = isNaN(d) || d <= 0 ? 'bg-slate-100 text-slate-600' : d <= 14 ? 'bg-rose-50 text-rose-700' : d <= 45 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700';
                     return `
                     <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 gap-3">
                         <div>
-                            <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">${isNaN(d) ? 'Year-round' : d > 0 ? d + ' days away' : 'Cycle passed'}</span>
+                            <span class="text-xs ${badgeTone} font-bold px-2 py-0.5 rounded">${isNaN(d) ? 'Year-round' : d > 0 ? d + ' days away' : 'Cycle passed'}</span>
                             <h4 class="font-bold text-slate-900 text-lg mt-1">${e.name}</h4>
                             <p class="text-slate-600 text-xs mt-0.5">${e.courses}</p>
                         </div>
