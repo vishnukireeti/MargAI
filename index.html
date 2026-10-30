@@ -411,11 +411,12 @@
                     <button type="button" role="tab" id="auth-tab-login" aria-selected="false" onclick="authShow('login')" class="min-h-[40px] rounded-lg text-sm font-semibold transition">Log in</button>
                 </div>
 
-                <button type="button" onclick="authShow('google')" class="w-full min-h-[48px] flex items-center justify-center gap-3 border border-slate-300 hover:bg-slate-50 rounded-xl font-semibold text-slate-700 transition">
+                <button type="button" onclick="authGoogleStart()" class="w-full min-h-[48px] flex items-center justify-center gap-3 border border-slate-300 hover:bg-slate-50 rounded-xl font-semibold text-slate-700 transition">
                     <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
                     Continue with Google
                 </button>
-                <div class="flex items-center gap-3 text-xs text-slate-500 my-4"><div class="flex-1 h-px bg-slate-200"></div>or use your details<div class="flex-1 h-px bg-slate-200"></div></div>
+                <p id="auth-google-err" role="alert" class="hidden text-xs text-rose-600 mt-2"></p>
+                <div class="flex items-center gap-3 text-xs text-slate-500 my-4"><div class="flex-1 h-px bg-slate-200"></div>or use email<div class="flex-1 h-px bg-slate-200"></div></div>
 
                 <form id="auth-form-signup" class="space-y-3" novalidate onsubmit="authSignup(event)">
                     <div>
@@ -424,17 +425,14 @@
                         <p id="auth-name-err" role="alert" class="hidden text-xs text-rose-600 mt-1"></p>
                     </div>
                     <div>
-                        <label for="auth-phone" class="block text-sm font-semibold text-slate-700 mb-1">Mobile number</label>
-                        <div class="flex gap-2">
-                            <span class="min-h-[48px] px-3 flex items-center bg-slate-100 border border-slate-200 rounded-xl text-slate-600 text-sm font-semibold">+91</span>
-                            <input id="auth-phone" type="tel" inputmode="numeric" maxlength="16" autocomplete="tel-national" placeholder="10-digit number" oninput="this.value=this.value.replace(/\D/g,'').slice(-10)" aria-describedby="auth-phone-err" class="flex-1 min-w-0 min-h-[48px] px-4 border border-slate-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-500">
-                        </div>
-                        <p id="auth-phone-err" role="alert" class="hidden text-xs text-rose-600 mt-1"></p>
-                    </div>
-                    <div>
                         <label for="auth-email" class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
                         <input id="auth-email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" aria-describedby="auth-email-err" class="w-full min-h-[48px] px-4 border border-slate-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-500">
                         <p id="auth-email-err" role="alert" class="hidden text-xs text-rose-600 mt-1"></p>
+                    </div>
+                    <div>
+                        <label for="auth-password" class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                        <input id="auth-password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" aria-describedby="auth-password-err" class="w-full min-h-[48px] px-4 border border-slate-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <p id="auth-password-err" role="alert" class="hidden text-xs text-rose-600 mt-1"></p>
                     </div>
                     <div>
                         <label class="flex items-start gap-3 text-sm text-slate-700 cursor-pointer">
@@ -444,35 +442,23 @@
                         <p id="auth-consent-err" role="alert" class="hidden text-xs text-rose-600 mt-1"></p>
                     </div>
                     <p id="auth-signup-err" role="alert" class="hidden text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2"></p>
-                    <button type="submit" class="w-full min-h-[48px] bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold transition">Create account</button>
+                    <p id="auth-signup-ok" role="status" class="hidden text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2"></p>
+                    <button type="submit" id="auth-signup-submit" class="w-full min-h-[48px] bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold transition">Create account</button>
                 </form>
 
                 <form id="auth-form-login" class="hidden space-y-3" novalidate onsubmit="authLogin(event)">
                     <div>
-                        <label for="auth-login-id" class="block text-sm font-semibold text-slate-700 mb-1">Email or mobile number</label>
-                        <input id="auth-login-id" type="text" autocomplete="username" placeholder="you@example.com or 10-digit number" aria-describedby="auth-login-err" class="w-full min-h-[48px] px-4 border border-slate-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-500">
-                        <p id="auth-login-err" role="alert" class="hidden text-xs text-rose-600 mt-1"></p>
+                        <label for="auth-login-email" class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                        <input id="auth-login-email" type="email" autocomplete="username" placeholder="you@example.com" aria-describedby="auth-login-err" class="w-full min-h-[48px] px-4 border border-slate-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-500">
                     </div>
-                    <button type="submit" class="w-full min-h-[48px] bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold transition">Log in</button>
+                    <div>
+                        <label for="auth-login-password" class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                        <input id="auth-login-password" type="password" autocomplete="current-password" placeholder="Your password" aria-describedby="auth-login-err" class="w-full min-h-[48px] px-4 border border-slate-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <p id="auth-login-err" role="alert" class="hidden text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2"></p>
+                    <button type="submit" id="auth-login-submit" class="w-full min-h-[48px] bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold transition">Log in</button>
+                    <button type="button" onclick="authForgotPassword()" class="w-full min-h-[40px] text-sm font-semibold text-brand-700 hover:underline">Forgot password?</button>
                 </form>
-
-                <div id="auth-demo-note" class="text-xs bg-amber-50 border border-amber-200 text-amber-900 rounded-xl px-3 py-2 mt-5"><strong>Saved on this device only, for now.</strong> We don't verify your number or email yet, and no message is sent. Signing in on another phone or laptop will work once online accounts are switched on.</div>
-            </div>
-
-            <div id="auth-step-google" class="hidden space-y-3">
-                <p class="text-sm text-slate-600">Google sign-in is not switched on yet, so nothing is sent to Google. You can still continue on this device with your name and email.</p>
-                <div>
-                    <label for="auth-g-name" class="block text-sm font-semibold text-slate-700 mb-1">Full name</label>
-                    <input id="auth-g-name" type="text" maxlength="60" autocomplete="name" placeholder="Your name" class="w-full min-h-[48px] px-4 border border-slate-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-500">
-                </div>
-                <div>
-                    <label for="auth-g-email" class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
-                    <input id="auth-g-email" type="email" autocomplete="email" placeholder="you@gmail.com" class="w-full min-h-[48px] px-4 border border-slate-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-500" onkeydown="if(event.key==='Enter')authGoogle()">
-                </div>
-                <label class="flex items-start gap-3 text-sm text-slate-700 cursor-pointer"><input id="auth-g-consent" type="checkbox" class="mt-1 w-5 h-5 shrink-0 accent-brand-600"><span>I am 18 or older, or I have my parent or guardian's permission.</span></label>
-                <p id="auth-g-err" role="alert" class="hidden text-xs text-rose-600"></p>
-                <button type="button" onclick="authGoogle()" class="w-full min-h-[48px] bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold transition">Continue</button>
-                <button type="button" onclick="authShow('signup')" class="w-full min-h-[44px] text-sm font-semibold text-slate-600">Back</button>
             </div>
 
             <div id="auth-step-account" class="hidden space-y-4">
@@ -480,10 +466,10 @@
                     <div id="auth-avatar" class="w-12 h-12 rounded-full bg-brand-100 text-brand-700 font-display font-bold text-xl flex items-center justify-center shrink-0"></div>
                     <div class="min-w-0"><div id="auth-acct-name" class="font-semibold text-slate-900 truncate"></div><div id="auth-acct-id" class="text-sm text-slate-600 truncate"></div></div>
                 </div>
-                <p class="text-sm text-slate-600">Your saved careers, colleges, exams and checklist are kept on this device.</p>
+                <p class="text-sm text-slate-600">Your saved careers, colleges, exams and checklist follow your account — sign in anywhere to see them.</p>
                 <button type="button" onclick="switchView('dashboard'); closeAuth()" class="w-full min-h-[48px] bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold transition">Go to my dashboard</button>
                 <button type="button" onclick="authLogout()" class="w-full min-h-[48px] border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl font-semibold transition">Log out</button>
-                <button type="button" onclick="authDelete()" class="w-full min-h-[44px] text-sm font-semibold text-rose-700 hover:underline">Delete my details from this device</button>
+                <button type="button" onclick="authDelete()" class="w-full min-h-[44px] text-sm font-semibold text-rose-700 hover:underline">Delete my saved data</button>
             </div>
             <p class="text-xs text-slate-500 mt-5 text-center">MARG-AI is for guidance only. Always verify details on official websites. We ask only for what we need, and you can delete your details any time.</p>
         </div>
@@ -8412,10 +8398,12 @@
         }
 
         function getSavedCareers() {
+            if (authGetSession()) return (cloudData && cloudData.savedCareers) || [];
             try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.saved)) || []; } catch(e) { return []; }
         }
         function setSavedCareers(arr) {
-            safeSetItem(STORAGE_KEYS.saved, JSON.stringify(arr));
+            if (authGetSession()) { if (cloudData) { cloudData.savedCareers = arr; scheduleCloudSave(); } }
+            else safeSetItem(STORAGE_KEYS.saved, JSON.stringify(arr));
             updateSavedBadge();
         }
         function toggleSaveCareer(careerId) {
@@ -8436,10 +8424,12 @@
         }
 
         function getSavedColleges() {
+            if (authGetSession()) return (cloudData && cloudData.savedColleges) || [];
             try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.savedColleges)) || []; } catch(e) { return []; }
         }
         function setSavedColleges(arr) {
-            safeSetItem(STORAGE_KEYS.savedColleges, JSON.stringify(arr));
+            if (authGetSession()) { if (cloudData) { cloudData.savedColleges = arr; scheduleCloudSave(); } }
+            else safeSetItem(STORAGE_KEYS.savedColleges, JSON.stringify(arr));
             updateSavedBadge();
         }
         function toggleSaveCollege(collegeId) {
@@ -8459,10 +8449,12 @@
         }
 
         function getSavedExams() {
+            if (authGetSession()) return (cloudData && cloudData.savedExams) || [];
             try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.savedExams)) || []; } catch(e) { return []; }
         }
         function setSavedExams(arr) {
-            safeSetItem(STORAGE_KEYS.savedExams, JSON.stringify(arr));
+            if (authGetSession()) { if (cloudData) { cloudData.savedExams = arr; scheduleCloudSave(); } }
+            else safeSetItem(STORAGE_KEYS.savedExams, JSON.stringify(arr));
             updateSavedBadge();
         }
         function toggleSaveExam(examId) {
@@ -8496,12 +8488,19 @@
             { id: 'c5', text: 'Reassess your career confidence level after 30 days of consistent exploration.', done: false }
         ];
         function getChecklist() {
+            if (authGetSession()) {
+                const stored = cloudData && cloudData.checklist;
+                return stored && stored.length ? stored : DEFAULT_CHECKLIST;
+            }
             try {
                 const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.checklist));
                 return stored && stored.length ? stored : DEFAULT_CHECKLIST;
             } catch(e) { return DEFAULT_CHECKLIST; }
         }
-        function setChecklist(list) { safeSetItem(STORAGE_KEYS.checklist, JSON.stringify(list)); }
+        function setChecklist(list) {
+            if (authGetSession()) { if (cloudData) { cloudData.checklist = list; scheduleCloudSave(); } }
+            else safeSetItem(STORAGE_KEYS.checklist, JSON.stringify(list));
+        }
         function toggleChecklistItem(id) {
             const list = getChecklist();
             const item = list.find(i => i.id === id);
@@ -8511,6 +8510,7 @@
         }
 
         function getProfile() {
+            if (authGetSession()) return (cloudData && cloudData.profile) || null;
             try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.profile)) || null; } catch(e) { return null; }
         }
         function saveProfile() {
@@ -8519,7 +8519,12 @@
                 location: document.getElementById('profile-location').value,
                 budget: document.getElementById('profile-budget').value
             };
-            if (safeSetItem(STORAGE_KEYS.profile, JSON.stringify(profile))) showToast('Profile saved');
+            if (authGetSession()) {
+                if (cloudData) { cloudData.profile = profile; scheduleCloudSave(); }
+                showToast('Profile saved');
+            } else if (safeSetItem(STORAGE_KEYS.profile, JSON.stringify(profile))) {
+                showToast('Profile saved');
+            }
         }
         function loadProfileIntoForm() {
             const p = getProfile();
@@ -9527,34 +9532,41 @@
            at once. The batch size resets whenever the filtered list changes
            (new search/filter/sort), but not when a card is saved/unsaved.
            ============================================================ */
-        // ---------- AUTH (on-device accounts) ----------
-        // There is no server behind this yet. Accounts live in this browser only and nothing is verified.
-        // To make accounts real (sync across devices, verified email, Google), connect an online service
-        // inside authSignup / authLogin / authGoogle (see AUTH_CONFIG) and keep the same screens.
-        const AUTH_CONFIG = { mode: 'device', service: null };
-        const AUTH_KEYS = { session: 'marg_session', accounts: 'marg_accounts', nudged: 'marg_auth_nudged' };
+        // ---------- AUTH (real accounts via Supabase Auth) ----------
+        // Email/password works right now. Google works once a Google OAuth Client ID/Secret
+        // is pasted into this Supabase project's dashboard (Authentication > Providers >
+        // Google) — see docs/PRE_LAUNCH_CHECKLIST.md. Nothing in this file needs to change
+        // when that happens; authGoogleStart() already calls the real thing, it just errors
+        // gracefully today because the provider isn't turned on yet.
+        //
+        // A signed-out visitor keeps using localStorage exactly as before (see STORAGE_KEYS
+        // and getSavedCareers() etc. below) — signing in is optional, not required to use
+        // the app. Once signed in, those same functions read/write `cloudData` instead,
+        // which is synced to the user_data table (see supabase_schema.sql). currentAuthSession
+        // is the single source of truth for "am I signed in," kept up to date by the
+        // onAuthStateChange listener below, so it can be read synchronously anywhere in this
+        // file without every call site needing to be made async.
+        let currentAuthSession = null;
+        const AUTH_LOCAL_KEYS = { nudged: 'marg_auth_nudged' };
         const authState = { opener: null, tab: 'signup' };
 
-        function authGetSession() { try { return JSON.parse(localStorage.getItem(AUTH_KEYS.session)) || null; } catch (e) { return null; } }
-        function authGetAccounts() { try { return JSON.parse(localStorage.getItem(AUTH_KEYS.accounts)) || {}; } catch (e) { return {}; } }
+        function authGetSession() { return currentAuthSession; }
         function authErr(id, msg) {
             const el = document.getElementById(id); if (!el) return;
             el.textContent = msg; el.classList.toggle('hidden', !msg);
             const inp = document.getElementById(id.replace(/-err$/, '')); if (inp) inp.setAttribute('aria-invalid', msg ? 'true' : 'false');
         }
-        function authClearErrs() { ['auth-name-err', 'auth-phone-err', 'auth-email-err', 'auth-consent-err', 'auth-signup-err', 'auth-login-err', 'auth-g-err'].forEach(function (id) { authErr(id, ''); }); }
-        function authNormPhone(v) { return String(v || '').replace(/\D/g, '').replace(/^(91|0)(?=\d{10}$)/, ''); }
+        function authClearErrs() { ['auth-name-err', 'auth-email-err', 'auth-password-err', 'auth-consent-err', 'auth-signup-err', 'auth-signup-ok', 'auth-login-err', 'auth-google-err'].forEach(function (id) { authErr(id, ''); }); }
         function authValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
-        function authFind(id) {
-            const q = String(id || '').trim().toLowerCase(), ph = authNormPhone(q), acc = authGetAccounts();
-            return Object.keys(acc).map(function (k) { return acc[k]; }).find(function (a) { return (q.indexOf('@') > -1 && a.email && a.email.toLowerCase() === q) || (/^[6-9]\d{9}$/.test(ph) && a.phone === ph); }) || null;
+        function authBusy(formId, submitId, busy) {
+            const btn = document.getElementById(submitId);
+            if (btn) { btn.disabled = busy; btn.textContent = busy ? 'Please wait…' : (formId === 'auth-form-signup' ? 'Create account' : 'Log in'); }
         }
 
         function authShow(step) {
             authClearErrs();
             const forms = step === 'signup' || step === 'login';
             document.getElementById('auth-forms').classList.toggle('hidden', !forms);
-            document.getElementById('auth-step-google').classList.toggle('hidden', step !== 'google');
             document.getElementById('auth-step-account').classList.toggle('hidden', step !== 'account');
             if (forms) {
                 authState.tab = step;
@@ -9569,13 +9581,12 @@
             const titles = {
                 signup: ['Create your account', 'Keep your saved careers, colleges, exams and checklist in one place.'],
                 login: ['Welcome back', 'Log in to pick up where you left off.'],
-                google: ['Continue with Google', 'One more step to finish.'],
                 account: ['Your account', '']
             };
             document.getElementById('auth-title').textContent = titles[step][0];
             document.getElementById('auth-sub').textContent = titles[step][1];
             document.getElementById('auth-sub').classList.toggle('hidden', !titles[step][1]);
-            const focusId = { signup: 'auth-name', login: 'auth-login-id', google: 'auth-g-name' }[step];
+            const focusId = { signup: 'auth-name', login: 'auth-login-email' }[step];
             if (focusId) setTimeout(function () { const el = document.getElementById(focusId); if (el) el.focus(); }, 60);
         }
 
@@ -9585,15 +9596,13 @@
             m.classList.remove('hidden'); m.classList.add('flex');
             document.body.style.overflow = 'hidden';
             if (s) {
-                document.getElementById('auth-avatar').textContent = (s.name || '?').trim().charAt(0).toUpperCase();
-                document.getElementById('auth-acct-name').textContent = s.name;
-                const ph = s.phone ? '+91 ' + s.phone.slice(0, 2) + '••••••' + s.phone.slice(-2) : '';
-                document.getElementById('auth-acct-id').textContent = [s.email, ph].filter(Boolean).join(' · ');
+                const name = (s.user.user_metadata && s.user.user_metadata.full_name) || s.user.email;
+                document.getElementById('auth-avatar').textContent = (name || '?').trim().charAt(0).toUpperCase();
+                document.getElementById('auth-acct-name').textContent = name;
+                document.getElementById('auth-acct-id').textContent = s.user.email || '';
                 authShow('account');
             } else {
                 ['auth-form-signup', 'auth-form-login'].forEach(function (id) { document.getElementById(id).reset(); });
-                ['auth-g-name', 'auth-g-email'].forEach(function (id) { document.getElementById(id).value = ''; });
-                document.getElementById('auth-g-consent').checked = false;
                 authShow(tab === 'login' ? 'login' : 'signup');
             }
         }
@@ -9607,76 +9616,93 @@
         function authSignup(ev) {
             if (ev) ev.preventDefault();
             authClearErrs();
+            if (!sb) { authErr('auth-signup-err', "Can't reach the server right now. Check your connection and try again."); return; }
             const name = document.getElementById('auth-name').value.trim().replace(/\s+/g, ' ');
-            const phone = authNormPhone(document.getElementById('auth-phone').value);
             const email = document.getElementById('auth-email').value.trim().toLowerCase();
+            const password = document.getElementById('auth-password').value;
             let bad = null;
             if (name.length < 2) { authErr('auth-name-err', 'Please enter your name.'); bad = bad || 'auth-name'; }
-            if (!/^[6-9]\d{9}$/.test(phone)) { authErr('auth-phone-err', 'Enter a valid 10-digit mobile number.'); bad = bad || 'auth-phone'; }
             if (!authValidEmail(email)) { authErr('auth-email-err', 'Enter a valid email address, like name@example.com.'); bad = bad || 'auth-email'; }
+            if (password.length < 8) { authErr('auth-password-err', 'Use at least 8 characters.'); bad = bad || 'auth-password'; }
             if (!document.getElementById('auth-consent').checked) { authErr('auth-consent-err', 'Please confirm this to continue.'); bad = bad || 'auth-consent'; }
             if (bad) { document.getElementById(bad).focus(); return; }
-            if (authFind(email) || authFind(phone)) {
-                authErr('auth-signup-err', 'An account with this email or number already exists on this device. Please log in instead.');
-                return;
-            }
-            authFinish({ method: 'form', name: name, phone: phone, email: email, createdAt: Date.now() });
-            showToast('Account created. Welcome, ' + name.split(' ')[0] + '!');
+            authBusy('auth-form-signup', 'auth-signup-submit', true);
+            sb.auth.signUp({ email: email, password: password, options: { data: { full_name: name } } }).then(function (res) {
+                authBusy('auth-form-signup', 'auth-signup-submit', false);
+                if (res.error) { authErr('auth-signup-err', res.error.message || 'Could not create your account. Please try again.'); return; }
+                if (res.data.session) {
+                    showToast('Account created. Welcome, ' + name.split(' ')[0] + '!');
+                    closeAuth();
+                } else {
+                    // Email confirmation is required before a session is issued.
+                    authErr('auth-signup-ok', "Almost there — check " + email + " for a confirmation link, then log in.");
+                }
+            }, function () {
+                authBusy('auth-form-signup', 'auth-signup-submit', false);
+                authErr('auth-signup-err', "Can't reach the server right now. Check your connection and try again.");
+            });
         }
         function authLogin(ev) {
             if (ev) ev.preventDefault();
             authClearErrs();
-            const id = document.getElementById('auth-login-id').value.trim();
-            if (!id) { authErr('auth-login-err', 'Enter your email or mobile number.'); return; }
-            const a = authFind(id);
-            if (!a) { authErr('auth-login-err', 'No account found on this device for that email or number. Check it, or sign up.'); return; }
-            authFinish(a);
-            showToast('Welcome back, ' + (a.name || '').split(' ')[0]);
+            if (!sb) { authErr('auth-login-err', "Can't reach the server right now. Check your connection and try again."); return; }
+            const email = document.getElementById('auth-login-email').value.trim().toLowerCase();
+            const password = document.getElementById('auth-login-password').value;
+            if (!authValidEmail(email) || !password) { authErr('auth-login-err', 'Enter your email and password.'); return; }
+            authBusy('auth-form-login', 'auth-login-submit', true);
+            sb.auth.signInWithPassword({ email: email, password: password }).then(function (res) {
+                authBusy('auth-form-login', 'auth-login-submit', false);
+                if (res.error) { authErr('auth-login-err', res.error.message || 'Could not log in. Check your email and password.'); return; }
+                showToast('Welcome back' + (res.data.user.user_metadata && res.data.user.user_metadata.full_name ? ', ' + res.data.user.user_metadata.full_name.split(' ')[0] : '') + '!');
+                closeAuth();
+            }, function () {
+                authBusy('auth-form-login', 'auth-login-submit', false);
+                authErr('auth-login-err', "Can't reach the server right now. Check your connection and try again.");
+            });
         }
-        function authGoogle() {
-            authErr('auth-g-err', '');
-            const name = document.getElementById('auth-g-name').value.trim().replace(/\s+/g, ' ');
-            const email = document.getElementById('auth-g-email').value.trim().toLowerCase();
-            if (name.length < 2) { authErr('auth-g-err', 'Please enter your name.'); return; }
-            if (!authValidEmail(email)) { authErr('auth-g-err', 'Enter a valid email address.'); return; }
-            const existing = authFind(email);
-            if (!existing && !document.getElementById('auth-g-consent').checked) { authErr('auth-g-err', 'Please confirm the permission line to continue.'); return; }
-            const acct = existing || { method: 'google', name: name, email: email, phone: '', createdAt: Date.now() };
-            authFinish(acct);
-            showToast(existing ? 'Welcome back, ' + acct.name.split(' ')[0] : 'Account created. Welcome, ' + name.split(' ')[0] + '!');
+        function authForgotPassword() {
+            authClearErrs();
+            if (!sb) { authErr('auth-login-err', "Can't reach the server right now."); return; }
+            const email = document.getElementById('auth-login-email').value.trim().toLowerCase();
+            if (!authValidEmail(email)) { authErr('auth-login-err', 'Enter your email above first, then tap "Forgot password?" again.'); return; }
+            sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }).then(function (res) {
+                if (res.error) { authErr('auth-login-err', res.error.message || 'Could not send a reset email.'); return; }
+                authErr('auth-login-err', '');
+                showToast('Password reset link sent to ' + email);
+            });
         }
-        function authKey(a) { return a.email ? 'e:' + a.email.toLowerCase() : 'p:' + a.phone; }
-        function authFinish(acct) {
-            const accounts = authGetAccounts();
-            accounts[authKey(acct)] = acct;
-            safeSetItem(AUTH_KEYS.accounts, JSON.stringify(accounts));
-            safeSetItem(AUTH_KEYS.session, JSON.stringify(acct));
-            closeAuth();
-            updateAuthUI();
-            try { if (typeof renderDashboard === 'function') renderDashboard(); } catch (e) {}
+        // Real OAuth redirect — this leaves the page. authGetSession() picks up the result
+        // automatically on return, via onAuthStateChange, since supabase-js reads the token
+        // out of the redirect URL on load (detectSessionInUrl, on by default).
+        function authGoogleStart() {
+            authErr('auth-google-err', '');
+            if (!sb) { authErr('auth-google-err', "Can't reach the server right now."); return; }
+            sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }).then(function (res) {
+                if (res.error) { authErr('auth-google-err', 'Google sign-in is not switched on yet. Please use email instead for now.'); }
+            });
         }
         function authLogout() {
-            try { localStorage.removeItem(AUTH_KEYS.session); } catch (e) {}
-            closeAuth(); updateAuthUI();
-            try { renderDashboard(); } catch (e) {}
+            if (sb) sb.auth.signOut();
+            closeAuth();
             showToast('Logged out');
         }
         function authDelete() {
-            if (!window.confirm('Delete your name, number and email from this device? Your saved items stay.')) return;
+            if (!window.confirm('Delete all your saved careers, colleges, exams, checklist and profile from your account? This cannot be undone. Your login itself stays — only the saved data goes.')) return;
             const s = authGetSession();
-            try {
-                if (s) { const acc = authGetAccounts(); Object.keys(acc).forEach(function (k) { if (acc[k].email === s.email && acc[k].phone === s.phone) delete acc[k]; }); localStorage.setItem(AUTH_KEYS.accounts, JSON.stringify(acc)); }
-                localStorage.removeItem(AUTH_KEYS.session);
-            } catch (e) {}
-            closeAuth(); updateAuthUI();
-            try { renderDashboard(); } catch (e) {}
-            showToast('Your details were removed from this device');
+            if (!sb || !s) return;
+            sb.from('user_data').delete().eq('user_id', s.user.id).then(function (res) {
+                if (res.error) { showToast("Couldn't delete your data — please try again."); return; }
+                cloudData = cloudDataDefaults();
+                closeAuth();
+                try { renderDashboard(); } catch (e) {}
+                showToast('Your saved data was deleted');
+            });
         }
         // One gentle prompt, the first time someone saves something without an account.
         function authNudge() {
             try {
-                if (authGetSession() || localStorage.getItem(AUTH_KEYS.nudged)) return;
-                localStorage.setItem(AUTH_KEYS.nudged, '1');
+                if (authGetSession() || localStorage.getItem(AUTH_LOCAL_KEYS.nudged)) return;
+                localStorage.setItem(AUTH_LOCAL_KEYS.nudged, '1');
             } catch (e) { return; }
             setTimeout(function () { if (!authGetSession() && document.getElementById('auth-modal').classList.contains('hidden')) { openAuth('signup'); document.getElementById('auth-sub').textContent = 'Nice, you saved something. Create an account so you can find it again.'; } }, 1200);
         }
@@ -9686,13 +9712,86 @@
             const btn = document.getElementById('auth-header-btn');
             if (!btn) return;
             if (s) {
-                const first = (s.name || 'Account').split(' ')[0];
+                const name = (s.user.user_metadata && s.user.user_metadata.full_name) || s.user.email || 'Account';
+                const first = name.split(' ')[0];
                 btn.innerHTML = '<span class="inline-flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-brand-600 text-white text-xs font-bold inline-flex items-center justify-center">' + escapeAuth(first.charAt(0).toUpperCase()) + '</span><span class="hidden sm:inline max-w-[90px] truncate">' + escapeAuth(first) + '</span></span>';
                 btn.setAttribute('aria-label', 'Account menu for ' + first);
                 btn.setAttribute('title', 'Your account');
             } else { btn.textContent = 'Sign up'; btn.setAttribute('aria-label', 'Sign up or log in'); btn.setAttribute('title', 'Create an account or log in'); }
         }
         function escapeAuth(t) { return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+        /* ---------- CLOUD DATA (signed-in users only) ----------
+           Mirrors the shape used in localStorage (see STORAGE_KEYS below), stored as one
+           JSONB blob per user in the user_data table (see supabase_schema.sql). Kept as an
+           in-memory object, synced to Supabase with a short debounce, so getSavedCareers()
+           and friends stay synchronous and don't need to change at every call site — only
+           which storage they read/write from changes, based on authGetSession(). */
+        let cloudData = null; // null until loaded; set on sign-in, cleared on sign-out
+        let cloudSaveTimer = null;
+        const CLOUD_SAVE_DEBOUNCE_MS = 800;
+
+        function cloudDataDefaults() { return { savedCareers: [], savedColleges: [], savedExams: [], checklist: null, profile: null }; }
+
+        function scheduleCloudSave() {
+            if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
+            cloudSaveTimer = setTimeout(flushCloudSave, CLOUD_SAVE_DEBOUNCE_MS);
+        }
+        function flushCloudSave() {
+            cloudSaveTimer = null;
+            const s = authGetSession();
+            if (!sb || !s || !cloudData) return;
+            sb.from('user_data').upsert({ user_id: s.user.id, data: cloudData }, { onConflict: 'user_id' }).then(function (res) {
+                if (res.error) console.error('Cloud save failed:', res.error.message);
+            }, function (err) { console.error('Cloud save failed:', err); });
+        }
+
+        // Whatever is in localStorage right now, in the cloudData shape — used to seed a
+        // brand-new user_data row the first time someone with existing local saves signs
+        // in for real, so they don't lose what they already had.
+        function collectLocalDataForMigration() {
+            function get(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; } }
+            return {
+                savedCareers: get(STORAGE_KEYS.saved) || [],
+                savedColleges: get(STORAGE_KEYS.savedColleges) || [],
+                savedExams: get(STORAGE_KEYS.savedExams) || [],
+                checklist: get(STORAGE_KEYS.checklist),
+                profile: get(STORAGE_KEYS.profile)
+            };
+        }
+
+        // Called once per sign-in. Loads this user's row; if it's their first time, seeds
+        // it from whatever was already saved locally rather than starting them at zero.
+        function loadCloudData(session) {
+            if (!sb || !session) { cloudData = null; return Promise.resolve(); }
+            return sb.from('user_data').select('data').eq('user_id', session.user.id).maybeSingle().then(function (res) {
+                if (res.error) { console.error('Could not load your saved data:', res.error.message); cloudData = cloudDataDefaults(); return; }
+                if (res.data) {
+                    cloudData = Object.assign(cloudDataDefaults(), res.data.data || {});
+                } else {
+                    cloudData = Object.assign(cloudDataDefaults(), collectLocalDataForMigration());
+                    scheduleCloudSave();
+                }
+            }, function (err) { console.error('Could not load your saved data:', err); cloudData = cloudDataDefaults(); });
+        }
+
+        // Wired to supabase-js: fires on load with whatever session exists (including right
+        // after a Google redirect comes back), and again on every sign-in/sign-out.
+        if (sb) {
+            sb.auth.onAuthStateChange(function (event, session) {
+                const wasSignedIn = !!currentAuthSession;
+                currentAuthSession = session;
+                updateAuthUI();
+                if (session && !wasSignedIn) {
+                    loadCloudData(session).then(function () {
+                        try { renderDashboard(); } catch (e) {}
+                    });
+                } else if (!session && wasSignedIn) {
+                    cloudData = null;
+                    try { renderDashboard(); } catch (e) {}
+                }
+            });
+        }
 
         /* ============================================================
            BASIC USAGE TRACKING — anonymous, write-only, no accounts needed.
@@ -9738,7 +9837,7 @@
             if (e.shiftKey && (document.activeElement === first || !m.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
             else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
         });
-        window.addEventListener('storage', e => { if (e.key === AUTH_KEYS.session) updateAuthUI(); });
+        // (Cross-tab sync is now handled by Supabase's own auth client, not a manual storage listener.)
 
         // Arrow-key navigation for tab rows (Sign up / Log in, and the toolkits).
         document.addEventListener('keydown', function (e) {

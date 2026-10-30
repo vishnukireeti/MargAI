@@ -61,6 +61,84 @@ create policy "anyone can log an event"
 --   select event_name, count(*) from usage_events group by 1 order by 2 desc;
 
 -- ============================================================================
+-- user_data — one row per signed-in user, holding everything that used to live
+-- only in localStorage: saved careers/exams/colleges, checklist progress, and
+-- profile (stage/location/budget). A single JSONB blob per user rather than
+-- separate tables — simpler to build and migrate, at the cost of not being
+-- able to query individual saved items from SQL. Revisit if that's ever needed.
+--
+-- Requires a signed-in user (auth.uid()) — there is no anonymous/guest access
+-- to this table at all, unlike usage_events. A visitor who isn't signed in
+-- keeps using localStorage exactly as before; this table only exists for
+-- someone who has created a real account (see index.html's auth code).
+-- ============================================================================
+
+create table if not exists public.user_data (
+    user_id    uuid primary key references auth.users(id) on delete cascade,
+    data       jsonb not null default '{}'::jsonb,
+    updated_at timestamptz not null default now()
+);
+
+alter table public.user_data enable row level security;
+
+-- A signed-in user may only ever read, write or delete their OWN row — never
+-- another user's. No policy for the anon/public role exists at all: someone
+-- who isn't signed in has no access to this table, full stop.
+drop policy if exists "users can read own data" on public.user_data;
+create policy "users can read own data"
+    on public.user_data
+    for select
+    to authenticated
+    using (auth.uid() = user_id);
+
+drop policy if exists "users can insert own data" on public.user_data;
+create policy "users can insert own data"
+    on public.user_data
+    for insert
+    to authenticated
+    with check (auth.uid() = user_id);
+
+drop policy if exists "users can update own data" on public.user_data;
+create policy "users can update own data"
+    on public.user_data
+    for update
+    to authenticated
+    using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+
+drop policy if exists "users can delete own data" on public.user_data;
+create policy "users can delete own data"
+    on public.user_data
+    for delete
+    to authenticated
+    using (auth.uid() = user_id);
+
+-- Keeps updated_at honest on every write, without relying on the client to set it.
+create or replace function public.set_user_data_updated_at()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_user_data_updated_at on public.user_data;
+create trigger trg_user_data_updated_at
+    before update on public.user_data
+    for each row
+    execute function public.set_user_data_updated_at();
+
+-- NOTE: this table only holds app data, not the account itself. Deleting a
+-- user's Supabase Auth account (not just this row) needs a service-role call
+-- — the anon key the client uses can never do that — so a real "delete my
+-- account" feature needs a server-side function (e.g. a Supabase Edge
+-- Function) added later. Not built yet; flagging so it isn't assumed to work.
+
+-- ============================================================================
 -- Not yet built: the "decision room" feature referenced in index.html's Supabase
 -- comment (a shared space for a student + parent to plan together) has no tables
 -- here because it was never implemented — only commented as an intended future
