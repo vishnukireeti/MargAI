@@ -25,6 +25,40 @@ undo if you do this late.
       India's DPDP Act the way GDPR requires it in the EU, but worth
       doing anyway since GA4 sets tracking cookies).
 
+## Accounts (Google + email, SMS deferred)
+
+Email/password accounts work end-to-end (signup, login, forgot password,
+data synced to Supabase). Google needs one dashboard step; real network
+testing against Supabase hasn't happened yet because of a sandbox
+limitation, not a known bug — see below.
+
+- [ ] **Turn on Google sign-in**: in Google Cloud Console, create an OAuth
+      Client ID (see the step-by-step instructions given earlier in this
+      project) and paste the Client ID + Secret into Supabase's dashboard
+      → Authentication → Providers → Google. No code change needed —
+      `authGoogleStart()` already calls the real thing and will start
+      working the moment this is turned on.
+- [ ] **Test the real signup/login flow once deployed.** This was built
+      and verified against a mocked Supabase client (form validation,
+      session handling, cloud save/load, local-to-cloud migration, error
+      states all confirmed working), but the actual network round-trip to
+      Supabase was never exercised — the sandbox this was built in
+      couldn't reach `*.supabase.co` or the CDN that serves the Supabase
+      JS library at all (both outside its network allowlist). Once this
+      is live (or even running locally on your own machine), do one real
+      signup and one real login to confirm the network path itself works
+      end-to-end.
+- [ ] Phone/SMS login was intentionally dropped for now — TRAI requires
+      DLT registration before sending OTP SMS to Indian numbers, which is
+      a multi-day/week regulatory process. Revisit after launch if phone
+      login is still wanted (WhatsApp OTP is a DLT-free alternative worth
+      considering instead of SMS).
+- [ ] Full account deletion (not just saved-data deletion, which already
+      works from the app) needs a service-role call Supabase doesn't
+      expose to the client — currently handled as an email request per
+      the Privacy Policy. A proper self-service "delete my account"
+      button needs a Supabase Edge Function later.
+
 ## Naming
 
 - [ ] Pick the real app name (currently "MARG-AI", a placeholder). Once
@@ -54,3 +88,6 @@ undo if you do this late.
 - [x] Tailwind CDN JIT compiler replaced with a precompiled stylesheet
 - [x] Basic CI (structural/syntax/JSON/browser checks on every push)
 - [x] Stray unused Supabase project deleted
+- [x] Real Supabase Auth (email/password + Google code path) replacing
+      the old localStorage-only demo accounts; saved careers/colleges/
+      exams/checklist/profile now sync to an account when signed in
