@@ -54,6 +54,33 @@
         // BRAND COLOUR: change these ten values (and the three --brand-*-rgb numbers below) to recolour the whole app.
         tailwind.config = { theme: { extend: { colors: { brand: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554' } } } } };
     </script>
+    <!-- ============================================================================
+         RENAMING THIS APP (currently "MARG-AI" / margai.netlify.app) — checklist:
+
+         1. Text in this file (~30 spots): find-and-replace "MARG-AI" -> new name
+            and the standalone "MARG" nav-logo chip text (two spots, search for
+            >MARG<). A plain string replace is safe here — every occurrence is used
+            as a proper noun, no grammar breaks.
+         2. "margai.netlify.app" (this file + robots.txt + sitemap.xml): replace with
+            the new domain once you have one. Until then it's fine left as-is.
+         3. Run `python3 scripts/generate-brand-assets.py` after editing the
+            APP_NAME/APP_INITIAL/APP_TAGLINE constants at its top — regenerates
+            favicons + the OG/social-preview image (these bake the name into actual
+            pixels, so they can't be text-replaced).
+         4. Accounts that do NOT need recreating — only a cosmetic display-name
+            field, whenever convenient, never urgent:
+              - GA4: Admin > Property settings (property name only; the
+                Measurement ID itself never changes). Update the Data Stream's
+                website URL once the custom domain is live.
+              - Sentry: Project Settings > General > Name.
+              - Supabase: Project name in the dashboard (the project ref/URL is
+                separate and unaffected).
+              - GitHub repo: Settings > rename (old links auto-redirect).
+              - Netlify site: Project configuration > General > Site details >
+                change site name (this DOES change the *.netlify.app subdomain,
+                so only do this once, deliberately — not relevant at all once a
+                custom domain is attached, since that becomes the primary URL).
+         ============================================================================ -->
     <!-- Google Analytics 4. GA4_MEASUREMENT_ID is a placeholder — create a GA4 property at
          https://analytics.google.com (Admin > Create Property), add a Web data stream for this
          site's domain, and paste the stream's Measurement ID (format "G-XXXXXXXXXX") in below.
