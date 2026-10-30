@@ -554,16 +554,7 @@
                 <p class="text-xs text-slate-600 mt-5">Covers <span id="stat-careers">0</span> careers, <span id="stat-exams">0</span> exams, <span id="stat-colleges">0</span> colleges and <span id="stat-scholarships">0</span> scholarships. Your saved items stay on your device, or sync to your account if you sign in.</p>
             </div>
 
-            <!-- 2. Your progress: what is saved, what is coming up -->
-            <div class="mt-10 text-left">
-                <div class="flex items-baseline justify-between gap-3 mb-3">
-                    <h2 class="font-bold text-slate-900 text-lg">Your progress</h2>
-                    <span class="text-xs text-slate-600">Saved in this browser</span>
-                </div>
-                <div id="home-progress" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
-            </div>
-
-            <!-- 3. Your path, step by step (rendered from TOOL_DIRECTORY, one step open at a time) -->
+            <!-- 2. Your path, step by step (rendered from TOOL_DIRECTORY, one step open at a time) -->
             <div id="tool-directory-block" class="mt-10 text-left">
                 <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
                     <div>
@@ -8646,7 +8637,6 @@
             document.getElementById('stat-colleges').textContent = collegesData.length + '+';
             document.getElementById('stat-scholarships').textContent = SCHOLARSHIPS_DATA.length + '+';
 
-            renderHomeProgress();
             const faqList = document.getElementById('faq-list');
             faqList.innerHTML = faqData.map((f, idx) => `
                 <details class="bg-slate-50 border border-slate-200 rounded-xl px-5 py-4">
@@ -9349,7 +9339,7 @@
             // the quiz now knows the student, so colleges, exams and careers start tailored
             FIT_OFF = false;
             const cs = document.getElementById('college-sort'); if (cs) delete cs.dataset.touched;
-            try { renderColleges(); renderExams(); renderExplorerCareers(); renderHomeProgress(); } catch (er) { console.error(er); }
+            try { renderColleges(); renderExams(); renderExplorerCareers(); } catch (er) { console.error(er); }
         }
 
         function renderFamilyReflection() {
@@ -13121,29 +13111,6 @@
             const collapsed = grid.classList.toggle('home-collapsed');
             btn.textContent = collapsed ? 'Show ' + btn.getAttribute('data-more') + ' more' : 'Show fewer';
         }
-        function renderHomeProgress() {
-            const box = document.getElementById('home-progress');
-            if (!box) return;
-            const e = escapeAuth;
-            const ans = getStoredWizardAnswers();
-            let quiz;
-            if (ans) {
-                let best = null, bs = -1;
-                careersData.forEach(function (c) { const s = scoreCareerForWizard(c, ans).score; if (s > bs) { bs = s; best = c; } });
-                quiz = { label: 'Your quiz', main: best ? 'Top match: ' + best.title : 'Quiz done', sub: 'See all your matches', go: "sortExplorerByQuizMatch(); switchView('explorer')" };
-            } else quiz = { label: 'Your quiz', main: 'Not taken yet', sub: 'Take the 2-minute quiz', go: "switchView('confusedMode')" };
-            const dl = upcomingDeadlines()[0], names = { open: 'Registration opens', close: 'Registration closes', exam: 'Exam day' };
-            const dead = dl
-                ? { label: 'Next date', main: dl.e.name, sub: names[dl.kind] + ' ' + (dl.days === 0 ? 'today' : dl.days === 1 ? 'tomorrow' : 'in ' + dl.days + ' days'), go: "switchView('dashboard')" }
-                : { label: 'Next date', main: getSavedExams().length ? 'No upcoming dates' : 'No exam saved yet', sub: getSavedExams().length ? 'Open your dashboard' : 'Save an exam to track its dates', go: getSavedExams().length ? "switchView('dashboard')" : "switchView('exams')" };
-            const list = getChecklist(), done = list.filter(function (i) { return i.done; }).length;
-            const total = getSavedCareers().length + getSavedColleges().length + getSavedExams().length;
-            const keep = { label: 'Saved and checklist', main: total + ' saved · ' + done + ' of ' + list.length + ' steps done', sub: 'Open your dashboard', go: "switchView('dashboard')" };
-            box.innerHTML = [quiz, dead, keep].map(function (c) {
-                return '<button type="button" onclick="' + c.go + '" class="card-interactive text-left bg-white border border-slate-200 rounded-xl p-4 min-h-[88px]"><span class="block text-[11px] font-bold uppercase tracking-wider text-slate-600">' + e(c.label) + '</span><span class="block font-semibold text-slate-900 text-sm mt-1 break-words">' + e(c.main) + '</span><span class="block text-xs font-semibold text-brand-700 mt-1">' + e(c.sub) + ' \u2192</span></button>';
-            }).join('');
-        }
-
         /* ============================================================
            Dropdowns whose valid values live in the loaded datasets, not in
            fixed HTML: colleges (field, entrance exam, state), and
