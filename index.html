@@ -46,11 +46,56 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://mpfzxbvpndextzgiqpmo.supabase.co">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="preconnect" href="https://www.google-analytics.com">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // BRAND COLOUR: change these ten values (and the three --brand-*-rgb numbers below) to recolour the whole app.
         tailwind.config = { theme: { extend: { colors: { brand: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554' } } } } };
+    </script>
+    <!-- Google Analytics 4. GA4_MEASUREMENT_ID is a placeholder — create a GA4 property at
+         https://analytics.google.com (Admin > Create Property), add a Web data stream for this
+         site's domain, and paste the stream's Measurement ID (format "G-XXXXXXXXXX") in below.
+         Loading is skipped entirely until a real id is set, so this is inert right now. Because
+         GA4 sets tracking cookies, pair this with a cookie-consent notice if you want to match
+         strict best practice (not legally required under India's DPDP Act the way GDPR requires
+         it in the EU, but worth doing to match the app's own privacy-first positioning). -->
+    <script>
+        const GA4_MEASUREMENT_ID = 'PASTE_YOUR_GA4_MEASUREMENT_ID'; // e.g. 'G-ABC1234XYZ'
+        if (GA4_MEASUREMENT_ID && GA4_MEASUREMENT_ID.indexOf('PASTE_') !== 0) {
+            const gaScript = document.createElement('script');
+            gaScript.async = true;
+            gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA4_MEASUREMENT_ID);
+            document.head.appendChild(gaScript);
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            window.gtag = gtag;
+            gtag('js', new Date());
+            gtag('config', GA4_MEASUREMENT_ID);
+        }
+    </script>
+    <!-- Sentry: catches JS errors in production that would otherwise go completely unseen.
+         SENTRY_DSN is a placeholder — create a free project at https://sentry.io (Projects > Create
+         Project > Browser JavaScript), then paste its DSN (looks like
+         "https://<key>@<org>.ingest.us.sentry.io/<project>") below. Inert until a real DSN is set. -->
+    <script>
+        const SENTRY_DSN = 'PASTE_YOUR_SENTRY_DSN';
+        if (SENTRY_DSN && SENTRY_DSN.indexOf('PASTE_') !== 0) {
+            const sentryScript = document.createElement('script');
+            sentryScript.src = 'https://cdn.jsdelivr.net/npm/@sentry/browser@8/build/bundle.tracing.min.js';
+            sentryScript.crossOrigin = 'anonymous';
+            sentryScript.onload = function () {
+                try {
+                    Sentry.init({
+                        dsn: SENTRY_DSN,
+                        tracesSampleRate: 0.1,
+                        environment: location.hostname === 'localhost' ? 'dev' : (location.hostname.indexOf('netlify.app') !== -1 ? 'preview' : 'production')
+                    });
+                } catch (e) { console.warn('Sentry did not initialise:', e); }
+            };
+            document.head.appendChild(sentryScript);
+        }
     </script>
     <!-- Supabase: backend for the parent-student decision room (feature G). The publishable/anon
          key below is meant to be public in client code — Row Level Security on the server is what
