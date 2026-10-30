@@ -42,18 +42,19 @@
     }
     </script>
 
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://mpfzxbvpndextzgiqpmo.supabase.co">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <link rel="preconnect" href="https://www.google-analytics.com">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // BRAND COLOUR: change these ten values (and the three --brand-*-rgb numbers below) to recolour the whole app.
-        tailwind.config = { theme: { extend: { colors: { brand: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554' } } } } };
-    </script>
+    <!-- Precompiled Tailwind CSS. This used to be the cdn.tailwindcss.com runtime JIT
+         compiler (a JS engine that recompiled all of this app's CSS, from scratch, in
+         every visitor's browser, on every page load — fine for a quick prototype, not
+         for production). It's now a plain static stylesheet, generated ahead of time by
+         scripts/build-tailwind.mjs. BRAND COLOUR: the ten brand.* values live in that
+         script now (and the three --brand-*-rgb numbers below) — after changing them,
+         run `node scripts/build-tailwind.mjs` to regenerate assets/tailwind.css. -->
+    <link rel="stylesheet" href="/assets/tailwind.css">
     <!-- ============================================================================
          RENAMING THIS APP (currently "MARG-AI" / margai.netlify.app) — checklist:
 
